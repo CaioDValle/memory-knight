@@ -27,14 +27,36 @@ let firstCard = '';
 
 let secondCard= '';
 
-const checkEndgame= () => {
-    const disabledCards= document.querySelectorAll('.disabled-card');
-    if (disabledCards.length === 20) {
-        clearInterval(this.loop);
-        alert(`Parabéns, ${spanPlayer.innerHTML}! Seu tempo foi: ${timer.innerHTML} `);
-}
-}
+let timerStarted = false; // controle para evitar múltiplos timers
 
+const checkEndgame = () => {
+    const disabledCards = document.querySelectorAll('.disabled-card');
+    if (disabledCards.length === 20) {
+        clearInterval(loop);
+        const player = localStorage.getItem('player');
+        const time = parseInt(timer.innerHTML, 10);
+        // Envia os dados para o backend Flask
+         fetch('/submit_score', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `name=${encodeURIComponent(player)}&game_time=${encodeURIComponent(time)}`
+        })
+        .then(response => {
+            if (response.ok) {
+                window.location.href = "/leaderboard";
+            } else {
+                alert('Erro ao salvar seu recorde!');
+            }
+        })
+        .catch(() => {
+            alert('Erro de conexão com o servidor!');
+        });
+    }
+}
+       
+       
 const checkCards = () => {
     const firstCharacter = firstCard.getAttribute('data-character');
     const secondCharacter = secondCard.getAttribute('data-character');
@@ -84,7 +106,7 @@ const createCard = (character) => {
     const front = createElement('div', 'face front');
     const back = createElement('div', 'face back');
 
-front.style.backgroundImage = `url('../images/${character}.png')`;
+front.style.backgroundImage = `url('/static/Images/${character}.png')`;
 
 card.appendChild (front);
 card.appendChild (back);
@@ -108,20 +130,43 @@ const loadGame = () => {
 }
 
 const startTimer = () => {
-    this.loop = setInterval(() => {
+    // Garante que só existe um timer rodando
+    if (window.loop) clearInterval(window.loop);
+    timer.innerHTML = "0";
+    window.loop = setInterval(() => {
         const currentTime = +timer.innerHTML;
-        timer.innerHTML= currentTime +1;
-
+        timer.innerHTML = currentTime + 1;
     }, 1000);
-
 }
 
-window.onload = () => {
-   spanPlayer.innerHTML = localStorage.getItem ('player');
-   startTimer();
-   loadGame();
+document.addEventListener('DOMContentLoaded', () => {
+    spanPlayer.innerHTML = "";
+    const bgMusic = document.getElementById('bg-music');
+    if (bgMusic) bgMusic.volume = 0.5;
 
-}
+    // Conecta o socket no endereço atual (importante para mobile)
+    const socket = io(window.location.origin);
+
+    // Aguarda o evento do computador
+    socket.on('start_game', function(data) {
+        console.log('Recebido start_game:', data); // debug
+        localStorage.setItem('player', data.player);
+        spanPlayer.innerText = data.player ? data.player : "Jogador";
+        const overlay = document.getElementById('overlay');
+        if (overlay) overlay.style.display = 'none';
+        grid.innerHTML = ""; // limpa grid antes de iniciar nova partida
+        loadGame();
+        if (!timerStarted) {
+            startTimer();
+            timerStarted = true;
+        }
+    });
+
+    // Para depuração: log quando conectar
+    socket.on('connect', function() {
+        console.log('Socket conectado no mobile!');
+    });
+});
 
 
 

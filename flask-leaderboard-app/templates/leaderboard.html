@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Ranking</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+<div class="wrapper">
+    <div class="lboard_section">
+        <h1>Leaderboard</h1>
+        <div class="lboard_wrap">
+            {% for player in players[:5] %}
+            <div class="lboard_mem">
+                <div class="img">
+                    <img src="{{ url_for('static', filename='Images/brain.png') }}" alt="player icon">
+                </div>
+                <div class="name_bar">
+                    <p><span>{{ loop.index }}.</span> {{ player[0] }}</p>
+                    <div class="bar_wrap">
+                        <div class="inner_bar" style="width: {{ 100 - player[1]|int if player[1] < 100 else 5 }}%"></div>
+                    </div>
+                </div>
+                <div class="points">
+                    {{ player[1] }} segundos
+                </div>
+            </div>
+            {% endfor %}
+       
+        </div>
+    </div>
+</div>
+<a href="{{ url_for('routes.login') }}" class="back-home" onclick="localStorage.removeItem('player')">Back to Home</a>
+<script src="{{ url_for('static', filename='js/scripts.js') }}"></script>
+</body>
+</html>

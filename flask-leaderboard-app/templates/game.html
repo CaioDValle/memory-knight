@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/reset.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/game.css') }}">
+    <script src="https://cdn.socket.io/4.7.4/socket.io.min.js"></script>
+    <script defer src="{{ url_for('static', filename='js/game.js') }}"></script>
+    <title>Memory Game</title>
+</head>
+<body>
+    <div id="overlay" style="position:fixed;top:0;left:0;width:100vw;height:110vh;background:rgba(0,0,0,0.7);color:#fff;display:flex;align-items:center;justify-content:center;z-index:9999;">
+        <h2>Aguardando início do jogo...</h2>
+    </div>
+    <main>
+        <header>
+            <span class="player"></span>
+            <span> Tempo:<span class="timer">00</span></span>
+        </header>
+        <div class="grid"></div>
+    </main>
+    <audio id="bg-music" src="{{ url_for('static', filename='sounds/grimm.mp4') }}" autoplay loop></audio>
+</body>
+</html>
